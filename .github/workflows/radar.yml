@@ -50,3 +50,4 @@ steps:
       git diff --cached --quiet || git commit -m "update seen state"
 
       git push
+```
