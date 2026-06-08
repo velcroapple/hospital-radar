@@ -2,7 +2,6 @@ name: Hospital Radar
 
 on:
   workflow_dispatch:
-
   schedule:
     - cron: "30 2 * * *"
     - cron: "30 14 * * *"
@@ -13,11 +12,9 @@ permissions:
 jobs:
   radar:
     runs-on: ubuntu-latest
-
     concurrency:
       group: radar
       cancel-in-progress: false
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -43,13 +40,8 @@ jobs:
         run: |
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
-
           git add data/seen.json
-
           git diff --cached --quiet && exit 0
-
           git commit -m "update seen state"
-
           git pull --rebase origin main
-      
           git push
