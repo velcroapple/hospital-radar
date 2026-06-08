@@ -1,4 +1,5 @@
 import requests
+import re
 from bs4 import BeautifulSoup
 
 
@@ -44,3 +45,60 @@ def get_rghs():
         events.append(event)
 
     return events
+
+
+def get_rajswasthya_circulars():
+
+    url = "https://rajswasthya.rajasthan.gov.in/link/fetch_data2.php"
+
+    response = requests.post(
+        url,
+        data={
+            "draw": 1,
+            "start": 0,
+            "length": 100
+        },
+        headers={
+            "User-Agent": "Mozilla/5.0"
+        }
+    )
+
+    data = response.json()
+
+    events = []
+
+    for row in data["data"]:
+
+        html = row["title"]
+
+        soup = BeautifulSoup(html, "html.parser")
+
+        title = soup.get_text(strip=True)
+
+        link = soup.find("a")
+
+        onclick = link.get("onclick", "")
+
+        match = re.search( r"openPDF\('([^']+)'\)" , onclick)
+
+        if not match:
+            continue
+
+        pdf_path = match.group(1)
+
+        pdf_url = (
+            "https://rajswasthya.rajasthan.gov.in/"
+            + pdf_path.replace("../", "")
+        )
+
+        event = {
+            "source": "RajSwasthya",
+            "title": title,
+            "date": row["date"],
+            "pdf_link": pdf_url
+        }
+
+        events.append(event)
+
+    return events
+
